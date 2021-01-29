@@ -7,7 +7,7 @@
 int main() {
 	auto generator = vanquisher::SineTerrainGenerator(16.);
 
-	auto terrain = vanquisher::Terrain(11, 32, generator, 2);
+	auto terrain = vanquisher::Terrain(11, 32, generator, 1);
 
 	double pos[2];
 	double value;
