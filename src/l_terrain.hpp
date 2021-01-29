@@ -90,7 +90,7 @@ namespace vanquisher {
 
 	class SineTerrainGenerator : public TerrainGenerator {
 	public:
-		SineTerrainGenerator(double amplitude = 18., double offset = 30., double x_scale = 32., double y_scale = 42., double roughness = .15);
+		SineTerrainGenerator(double amplitude = 18., double offset = 30., double x_scale = 32., double y_scale = 42., double roughness = .06);
 	
 		void generate(TerrainChunk &target, double off_x, double off_y) override;
 		void set_default_parameters() override;

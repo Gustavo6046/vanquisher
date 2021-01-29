@@ -1,5 +1,5 @@
-#include <cmath>
 #include <iostream>
+#include <cmath>
 #include <cassert>
 
 #include "l_terrain.hpp"
@@ -40,8 +40,6 @@ namespace vanquisher {
 		assert(x >= 0);
 		assert(y >= 0);
 
-		std::cout << "[terra-chunk height get] index " << y * width + x << ", x " << x << ", y " << y << std::endl;
-	
 		return this->heights[y * this->width + x];
 	}
 
@@ -196,6 +194,9 @@ namespace vanquisher {
 
 		// generate
 
+		x_scale = M_PI * 2 / x_scale;
+		y_scale = M_PI * 2 / y_scale;
+
 		while (cursor.next()) {
 			double rough = 0.0;
 
@@ -207,8 +208,6 @@ namespace vanquisher {
 				sin((off_x + cursor.px) * x_scale) +
 				sin((off_y + cursor.py) * y_scale)
 			);
-
-			//std::cout << "[terra-gen] pos: " << off_x + cursor.px << "," << off_y + cursor.py << " -> height: " << val << std::endl;
 
 			cursor.add(val);
 		}
@@ -230,8 +229,6 @@ namespace vanquisher {
 	}
 
 	TerrainChunk &Terrain::generate(int cx, int cy, int seed, double base_height) {
-		//std::cout << "[terra-gen] (cx: " << cx << ", cy:" << cy << ")" << std::endl;
-
 		auto new_chunk = this->make(cx, cy, seed, base_height);
 		
 		size_t index = new_chunk.first;
@@ -259,25 +256,22 @@ namespace vanquisher {
 	double Terrain::get_height(double px, double py) {
 		// Compute some coords
 
-		int tile_x1 = floor(px * resolution);
-		int tile_y1 = floor(py * resolution);
-		int tile_x2 = tile_x1 + 1;
-		int tile_y2 = tile_y1 + 1;
+		double tile_x = px * resolution;
+		double tile_y = py * resolution;
+		double tile_x1 = floor(tile_x);
+		double tile_y1 = floor(tile_y);
+		double tile_x2 = tile_x1 + 1;
+		double tile_y2 = tile_y1 + 1;
 
-		int cx1 = floor((double) tile_x1 / chunk_width);
-		int cx2 = floor((double) tile_x2 / chunk_width);
-		int cy1 = floor((double) tile_y1 / chunk_width);
-		int cy2 = floor((double) tile_y2 / chunk_width);
+		double cx1 = floor(tile_x1 / chunk_width);
+		double cx2 = floor(tile_x2 / chunk_width);
+		double cy1 = floor(tile_y1 / chunk_width);
+		double cy2 = floor(tile_y2 / chunk_width);
 
-		double pos_x1 = floor(px);
-		double pos_y1 = floor(py);
-		double pos_x2 = pos_x1 + 1.;
-		double pos_y2 = pos_x2 + 1.;
-
-		int localtile_x1 = tile_x1 - cx1 * chunk_width;
-		int localtile_x2 = tile_x1 - cx2 * chunk_width;
-		int localtile_y1 = tile_y1 - cy1 * chunk_width;
-		int localtile_y2 = tile_y2 - cy2 * chunk_width;
+		double localtile_x1 = tile_x1 - cx1 * chunk_width;
+		double localtile_x2 = tile_x2 - cx2 * chunk_width;
+		double localtile_y1 = tile_y1 - cy1 * chunk_width;
+		double localtile_y2 = tile_y2 - cy2 * chunk_width;
 
 		// Fetch heights from chunks
 
@@ -293,12 +287,10 @@ namespace vanquisher {
 
 		// Interpolate and return
 
-		double weight_a = (pos_x2 - px) * (pos_y2 - py);
-		double weight_b = (pos_x2 - px) * (py - pos_y1);
-		double weight_c = (px - pos_x1) * (pos_y2 - py);
-		double weight_d = (px - pos_x1) * (py - pos_y1);
-
-		std::cout << "[terra-height interp] " << " weights (" << val_a << ", " << val_b << ", " << val_c << ", " << val_d << ") . values (" << val_a << ", " << val_b << ", " << val_c << ", " << val_d << ")" << std::endl;
+		double weight_a = (tile_x2 - tile_x) * (tile_y2 - tile_y);
+		double weight_b = (tile_x2 - tile_x) * (tile_y - tile_y1);
+		double weight_c = (tile_x - tile_x1) * (tile_y2 - tile_y);
+		double weight_d = (tile_x - tile_x1) * (tile_y - tile_y1);
 
 		return (
 			val_a * weight_a +
