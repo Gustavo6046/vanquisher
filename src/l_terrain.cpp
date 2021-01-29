@@ -218,7 +218,7 @@ namespace vanquisher {
 
 	Terrain::Terrain(int world_seed, int chunk_width, TerrainGenerator &generator, int resolution) : chunks(), chunk_list(), generator(generator), chunk_width(chunk_width), world_seed(world_seed), resolution(resolution) {}
 
-	TerrainChunk &Terrain::make(int cx, int cy, int seed, double base_height) {
+	std::pair<size_t, TerrainChunk &> Terrain::make(int cx, int cy, int seed, double base_height) {
 		TerrainChunk item(cx, cy, seed, this->chunk_width, resolution, base_height);
 
 		this->chunk_list.push_back(item);
@@ -226,15 +226,20 @@ namespace vanquisher {
 		TerrainChunk &res = this->chunk_list.back();
 		res.generate(this->generator);
 
-		return res;
+		return { this->chunk_list.size() - 1, res };
 	}
 
-	void Terrain::generate(int cx, int cy, int seed, double base_height) {
+	TerrainChunk &Terrain::generate(int cx, int cy, int seed, double base_height) {
 		//std::cout << "[terra-gen] (cx: " << cx << ", cy:" << cy << ")" << std::endl;
+
+		auto new_chunk = this->make(cx, cy, seed, base_height);
+		
+		size_t index = new_chunk.first;
+		TerrainChunk &res = new_chunk.second;
 	
-		TerrainChunk &res = this->make(cx, cy, seed, base_height);
-	
-		this->chunks.insert({{cx, cy}, &res});
+		this->chunks.insert({{cx, cy}, index});
+
+		return res;
 	}
 
 	int Terrain::chunk_seed_for(int cx, int cy) {
@@ -248,7 +253,7 @@ namespace vanquisher {
 			generate(cx, cy, chunk_seed_for(cx, cy));
 		}
 	
-		return *chunks[std::make_pair(cx, cy)];
+		return chunk_list[chunks[std::make_pair(cx, cy)]];
 	}
 
 	double Terrain::get_height(double px, double py) {

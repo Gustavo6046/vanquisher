@@ -98,7 +98,7 @@ namespace vanquisher {
 
 	class Terrain {
 	protected:
-		std::unordered_map<std::pair<int, int>, TerrainChunk*, _hash_pair> chunks;
+		std::unordered_map<std::pair<int, int>, size_t, _hash_pair> chunks;
 		std::vector<TerrainChunk> chunk_list;
 		TerrainGenerator &generator;
 		int chunk_width;
@@ -107,8 +107,8 @@ namespace vanquisher {
 
 	public:
 		explicit Terrain(int world_seed, int chunk_width, TerrainGenerator &generator, int resolution = 1);
-		TerrainChunk &make(int cx, int cy, int seed, double base_height = 0.0);
-		void generate(int cx, int cy, int seed, double base_height = 0.0);
+		std::pair<size_t, TerrainChunk &> make(int cx, int cy, int seed, double base_height = 0.0);
+		TerrainChunk &generate(int cx, int cy, int seed, double base_height = 0.0);
 		int chunk_seed_for(int cx, int cy);
 		TerrainChunk &fetch(int cx, int cy);
 		double get_height(double px, double py);
